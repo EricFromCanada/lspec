@@ -92,6 +92,12 @@ define lspec_testSuite => type {
         .outputFailures
         .outputSummary
     }
+    public cancel => {
+        .outputPendings
+        .outputFailures
+        .output('\n\n')
+        sys_exit(0)
+    }
          
     // Stats
     data private numTests     = 0,
@@ -119,6 +125,7 @@ define lspec_testSuite => type {
                     'indentor'       = "    ",
                     'suppressOutput' = false,
                     'colorOutput'    = false,
+                    'failFast'       = false,
          )
     // Configuration Options Setters & Getters
     public options => .'options'
@@ -138,6 +145,10 @@ define lspec_testSuite => type {
     public isOutputInColor =>   .options->find(`colorOutput`),
            noColor         => { .options->find(`colorOutput`) = false },
            useColor        => { .options->find(`colorOutput`) = true  }
+           
+    public isFailingFast   =>   .options->find(`failFast`),
+           failNormal      => { .options->find(`failFast`) = false },
+           failFast        => { .options->find(`failFast`) = true  }
            
     public resultsFormat => .options->find('resultsFormat')
     public formatResults(new::string) => {
@@ -512,6 +523,7 @@ define lspec_test => type {
         }
         
         .parentSuite->outputStatus(.status)
+        .parentSuite->isFailingFast and .parentSuite->numFailures? .parentSuite->cancel
     }
 }
 

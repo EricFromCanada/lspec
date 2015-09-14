@@ -576,4 +576,36 @@ describe('lspec command') => {
             expect(#stdout->asString->contains(#expected))
         }
     }
+    context('called with the -failfast argument') => {
+        local(file_testFail) = file('//tmp/lspec.test.fail')
+        beforeAll => {
+            #file_testFail->doWithClose => {
+                #file_testFail->openTruncate&writeString("\
+                    describe('passing test') => { it('passes') => { expect(true) } }\n\
+                    describe('fail and pass') => { it('fails') => { expect(false) }
+                                                   it('passes') => { expect(true) } }\n\
+                    describe('failing test') => { it('fails again') => { expect(false) } }\
+                ")
+            }
+        }
+        afterAll => {
+            #file_testFail->delete
+        }
+        it(`stops after the first failure`) => {
+            local(expected) = regexp(
+                string_replace($termColor('boldGreen'), -find=`[`, -replace=`\[`) + "\\." +
+                string_replace($termColor('normal'), -find=`[`, -replace=`\[`) +
+                string_replace($termColor('boldRed'), -find=`[`, -replace=`\[`) + "F" +
+                string_replace($termColor('normal'), -find=`[`, -replace=`\[`) + "\n\n" +
+                string_replace($termColor('boldRed'), -find=`[`, -replace=`\[`) + "Failures:" +
+                string_replace($termColor('normal'), -find=`[`, -replace=`\[`) + "\n\n" +
+                "    1\\) fail and pass fails\n       Failure/Error: expect\\(false\\) \\}\n" +
+                "           expected: true\n                got: false\n       # 2:49 //tmp/lspec\\.test\\.fail\n\n\\Z"
+            )
+            local(stdout, stderr) = call_lspec((:'-failfast', #file_testFail->path))
+
+            expect(void == #stderr)
+            expect(#stdout->asString->contains(#expected))
+        }
+    }
 }

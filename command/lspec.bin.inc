@@ -24,6 +24,9 @@ Options
         considered Lasso files. This is useful when specifying a directory - all
         files ending in .spec.[listed extensions] will be run.
 
+    -failfast
+        Stop testing after the first failure.
+        
     -nocolor
         Don't use terminal colors for the output.
         
@@ -52,6 +55,7 @@ define lspec_runFile(f::file) => {
 local(exts)      = (:'inc')
 local(paths)     = array
 local(mode)      = 'p'
+local(fail_fast) = false
 local(use_color) = true
 
 local(opts) = ($argv->asArray->remove(1,1)&)
@@ -63,6 +67,9 @@ while(#opts->size > 0) => {
     case(bytes('-documentation'))
         #mode = 'd'
 
+    case(bytes('-failfast'))
+        #fail_fast = true
+        
     case(bytes('-nocolor'))
         #use_color = false
         
@@ -84,6 +91,8 @@ while(#opts->size > 0) => {
     ? #paths->insert('./spec/')
 
 lspec->formatResults(#mode)
+
+#fail_fast? lspec->failFast
 
 #use_color? lspec->useColor
 

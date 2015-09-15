@@ -604,6 +604,9 @@ define expect => type {
         .onCreate
         not #test_case? .fail(#expected, #got)
     }
+    public onCreate(expected::string, got) => {
+        .onCreate(#expected->equals(#got->asString, -case), #expected, #got->asString)
+    }
     public onCreate(expected, got) => {
         .onCreate(#expected == #got, #expected->asString, #got->asString)
     }

@@ -1037,6 +1037,49 @@ if(lspec->failures != #expected) => {
 
 
 
+#test_desc = "[expect(expect, got)] fails when expect != got because of case"
+lspec_setupForTesting
+describe("Something") => {
+    it("does something") => {
+        expect('Fast', 'fast')
+    }
+}
+if(lspec->numTests != 1) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numPending != 0) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numSuccesses != 0) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+if(lspec->numFailures != 1) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    abort
+}
+local(expected) = '\n\nFailures:\n
+' + lspec->indentor + '1) Something does something
+' + lspec->indentor + '   Failure/Error: expect(\'Fast\', \'fast\')
+' + lspec->indentor + '   ' + lspec->indentor + 'expected: Fast
+' + lspec->indentor + '   ' + lspec->indentor + '     got: fast
+' + lspec->indentor + '   # 1044:9 ' + currentCapture->callsite_file
+if(lspec->failures != #expected) => {
+    stdoutnl('Test Failed\n' + #test_desc)
+    stdoutnl(currentCapture->callStack->split('\n')->first)
+    stdoutnl('\nExpected\n' + #expected)
+    stdoutnl('\nReceived\n' + lspec->failures)
+    abort
+}
+
+
+
 #test_desc = "[expect->valueIsA] succeeds when it is passed a value that matches the passed tag using ->isA"
 lspec_setupForTesting
 describe("Something") => {
@@ -1099,7 +1142,7 @@ local(expected) = '\n\nFailures:\n
 ' + lspec->indentor + '   Failure/Error: expect->valueIsA(0, ::trait_forEach) => {}
 ' + lspec->indentor + '   ' + lspec->indentor + 'expected: trait_forEach
 ' + lspec->indentor + '   ' + lspec->indentor + '     got: 
-' + lspec->indentor + '   # 1074:9 ' + currentCapture->callsite_file
+' + lspec->indentor + '   # 1117:9 ' + currentCapture->callsite_file
 if(lspec->failures != #expected) => {
     stdoutnl('Test Failed\n' + #test_desc)
     stdoutnl(currentCapture->callStack->split('\n')->first)
